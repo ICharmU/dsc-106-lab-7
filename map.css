@@ -1,0 +1,146 @@
+html,
+body {
+  margin: 0;
+  padding: 5;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+}
+
+#map {
+  width: 100%; /* Adjust width to your desired size */
+  height: 100%; /* Adjust height to your desired size */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: subtle shadow for effect */
+  border-radius: 8px; /* Optional: rounded corners */
+}
+
+/* Ensure the map container is a positioned stacking context and hides overflow
+   so overlays (svg) and the map canvas fill it exactly with no visual gaps. */
+#map {
+  position: relative;
+  overflow: hidden;
+}
+
+#map svg {
+  position: absolute;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  display: block; /* removes default inline baseline gap for SVG */
+  /* Allow pointer events to pass through by default, but individual
+     marker elements will opt-in to receive pointer events. */
+  pointer-events: none;
+}
+
+/* Ensure the underlying Mapbox canvas fills the container as well. */
+#map canvas,
+.mapboxgl-canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* make marker circles interactive while keeping the SVG passthrough
+   behaviour for the rest of the overlay */
+#map svg circle,
+.station {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.circle {
+  /* visual styling only; color variables are declared on a shared rule
+     so both map circles and legend swatches use the same definitions */
+  fill: var(--color);
+  fill-opacity: 0.9;
+  stroke: rgb(255, 255, 255);
+  stroke-width: 1;
+}
+
+/* shared color variables + computed color for both marker circles and legend swatches */
+#map svg circle,
+.legend > div {
+  --color-departures: steelblue;
+  --color-arrivals: darkorange;
+  --color: color-mix(
+    in oklch,
+    var(--color-departures) calc(100% * var(--departure-ratio)),
+    var(--color-arrivals)
+  );
+}
+
+/* Legend styling: horizontal swatches contained in the legend box */
+.legend {
+  display: flex;
+  gap: 1px; /* small gap so swatches don't touch */
+  margin-block: 0.5rem; /* space from surrounding content */
+  background: rgba(255,255,255,0.95);
+  padding: 0.25rem;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  font-size: 0.85rem;
+  color: #111;
+}
+
+.legend > div {
+  flex: 1; /* equal-width columns */
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.25rem 0.35rem;
+  white-space: nowrap;
+}
+
+.legend > div::before {
+  content: '';
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 0.25rem;
+  flex: 0 0 1.05rem;
+  background: var(--color); /* use the shared computed color */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08) inset;
+}
+
+/* different text alignment per child */
+.legend > div:nth-child(1) { justify-content: flex-start; text-align: left; font-weight: 600; }
+.legend > div:nth-child(2) { justify-content: center; text-align: center; }
+.legend > div:nth-child(3) { justify-content: flex-end; text-align: right; }
+
+header {
+  display: flex;
+  gap: 1em;
+  align-items: baseline;
+}
+
+label {
+  margin-left: auto;
+  /* layout the label contents: text+slider on one row, details (any time / time) on their own row */
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* put the time and the '(any time)' hint on their own line so updating the time
+   text doesn't shift the slider */
+time, em {
+  display: block;
+  flex-basis: 100%;
+  text-align: center;
+}
+
+em {
+  color: #666;
+  font-style: italic;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* reasonable width for the slider */
+input[type="range"] {
+  width: 320px;
+}
